@@ -5,8 +5,7 @@ from django.http import HttpResponse,JsonResponse
 from django.db.models import Count
 
 strip_time = lambda x: datetime.datetime.strptime(x,'%Y-%m-%d').date()
-format_day = lambda x: x.strftime('%Y-%m-%d')
-
+format_day = lambda x: "Date(%d,%d,%d,0,0,0)" %(x.year,x.month,x.day)
 
 
 class TimeSeriesView(View):
@@ -48,7 +47,6 @@ class TimeSeriesView(View):
         results = []
         teachers = lambda queries: dict([ (t,0) for  t,q in queries])
 
-        print teachers
 
         total_results = {}
         for t,q in queries:
@@ -59,7 +57,6 @@ class TimeSeriesView(View):
                 total_results[date][t] = r['count']
 
 
-        print total_results
 
         teachers = [t for t,q in queries]
 
@@ -70,7 +67,6 @@ class TimeSeriesView(View):
                 v.append({'v':counts[t]})
 
             results.append( {'c': v})
-
 
         return results
 
@@ -84,7 +80,7 @@ class TimeSeriesView(View):
 
     def get(self,request):
 
-        s = strip_time(request.GET['s']) if 's' in request.GET else datetime.date.today()
+        s = strip_time(request.GET['s']) if 's' in request.GET else datetime.date.today() - datetime.timedelta(days=100)
         e = strip_time(request.GET['e']) if 'e' in request.GET else datetime.date.today()
 
         queries = self.get_ts_queries(s,e)
