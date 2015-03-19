@@ -37,7 +37,7 @@ class TimeSeriesView(View):
                               'type':'number',
                               })
 
-            queries.append( (label,new_q) )
+            queries.append( (label,ts_field,new_q) )
 
 
         return queries
@@ -45,20 +45,20 @@ class TimeSeriesView(View):
     def create_rows(self,queries,s,e):
         '''Takes the set of queries and makes rows in the table based on the day'''
         results = []
-        teachers = lambda queries: dict([ (t,0) for  t,q in queries])
+        teachers = lambda queries: dict([ (t,0) for  t,_,_ in queries])
 
 
         total_results = {}
-        for t,q in queries:
+        for t,ts_field,q in queries:
             for r in q:
-                date = r['date']
+                date = r[ts_field]
                 if(date not in total_results):
                     total_results[date] = teachers(queries)
                 total_results[date][t] = r['count']
 
 
 
-        teachers = [t for t,q in queries]
+        teachers = [t for t,_,_ in queries]
 
         for d,counts in total_results.iteritems():
             v = []
