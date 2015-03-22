@@ -29,9 +29,11 @@ class GoogleChartNode(template.Node):
         self.ctype = params[1]
         self.width = int(params[2])
         self.height= int(params[3])
+
+        self.title = params[4][1:-1]
         self.id = random.randint(1000,9999) #TODO some kind of unique ID please james :p
 
     def render(self,context):
         node = "<div id='%d'></div>" % self.id
-        node += "<script>$(function(){register_chart('%s','%s',%d,%d,'%s');});</script>" % (self.url,self.ctype,self.width,self.height,self.id)
+        node += "<script>$(function(){register_chart('%s','%s',%d,%d,'%s','%s');});</script>" % (self.url,self.ctype,self.width,self.height,self.id,self.title)
         return node

@@ -92,3 +92,44 @@ class TimeSeriesView(View):
 
 
 
+class SummedDataView(TimeSeriesView):
+    '''Like a time series view, but it puts summs all the data for a peroid into a chart'''
+
+    label = 'Objects'
+    label2 = 'Count'
+
+    def get_ts_queries(self,start,end):
+        '''adds the ts filtering and grouping onto the queries from get_queries'''
+        queries = []
+
+        #Set the column titles
+        self.cols = []
+        self.cols.append({'id': '', 'label': self.label, 'type': 'string'})
+        for label,ts_field,base_query in self.get_queries():
+
+            ts_filter = {ts_field+'__gte':start,
+                         ts_field+'__lte':end}
+            new_q = base_query.filter(**ts_filter)
+
+            queries.append( (label,ts_field,new_q) )
+
+        self.cols.append({'id':'',
+                          'label':self.label2,
+                          'type':'number',
+                          })
+
+        return queries
+
+    def create_rows(self,queries,s,e):
+        '''Takes the set of queries and makes rows in the table based on the day'''
+        results = []
+
+
+        for t,ts_field,q in queries:
+            row = []
+            row.append({'v':t})
+            row.append({'v':q.count()})
+            results.append({'c':row})
+
+        return results
+
