@@ -33,5 +33,5 @@ class GoogleChartNode(template.Node):
 
     def render(self,context):
         node = "<div id='%d'></div>" % self.id
-        node += "<script>$(function(){make_chart('%s','%s',%d,%d,'%s');});</script>" % (self.url,self.ctype,self.width,self.height,self.id)
+        node += "<script>$(function(){register_chart('%s','%s',%d,%d,'%s');});</script>" % (self.url,self.ctype,self.width,self.height,self.id)
         return node

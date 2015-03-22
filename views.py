@@ -8,6 +8,7 @@ strip_time = lambda x: datetime.datetime.strptime(x,'%Y-%m-%d').date()
 format_day = lambda x: "Date(%d,%d,%d,0,0,0)" %(x.year,x.month,x.day)
 
 
+
 class TimeSeriesView(View):
     '''Gets a simple time series query, override get_queries for your own TS queries'''
 
