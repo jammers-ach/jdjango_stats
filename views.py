@@ -87,7 +87,6 @@ class TimeSeriesView(View):
         s = [ ','.join([col['label'] for col in self.cols]) ]
         make_date = lambda d: d if not d.startswith('Date') else unformat_date(d)
         for row in rows:
-            print row
             s.append( ','.join([ make_date(unicode(x['v'])) for x in row['c']]))
 
         return '\n'.join(s)

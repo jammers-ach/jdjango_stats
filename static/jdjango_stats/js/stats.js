@@ -56,12 +56,12 @@ $.widget( "custom.gchart", {
         var row2 = $('<div></div>').appendTo(this.button_area).addClass('input-group');
         var row3 = $('<div></div>').appendTo(this.button_area).addClass('input-group');
 
-        row1.append(this._add_button('this week','view_this_week'));
-        row1.append(this._add_button('this month','view_this_month'));
-        row1.append(this._add_button('this year','view_this_year'));
+        row1.append(this._add_button(gettext('this week'),'view_this_week'));
+        row1.append(this._add_button(gettext('this month'),'view_this_month'));
+        row1.append(this._add_button(gettext('this year'),'view_this_year'));
 
-        this.r1 = $('<input type="text" class="form-control"/>').attr('placeholder','from').css('width','100px');
-        this.r2 = $('<input type="text" class="form-control"/>').attr('placeholder','to').css('width','100px');
+        this.r1 = $('<input type="text" class="form-control"/>').attr('placeholder',gettext('from')).css('width','100px');
+        this.r2 = $('<input type="text" class="form-control"/>').attr('placeholder',gettext('to')).css('width','100px');
 
         this.r1.datetimepicker({pickTime:false,format:this.format});
         this.r2.datetimepicker({pickTime:false,format:this.format});
@@ -74,7 +74,7 @@ $.widget( "custom.gchart", {
         this._on(this.r1,{'change':'load_date_range'})
 
 
-        this.excel_link = $('<a class="btn btn-default" href="" target="_blank">downlad in excel</a>').appendTo(row3);
+        this.excel_link = $('<a class="btn btn-default" href="" target="_blank">'+gettext('Download in excel')+'</a>').appendTo(row3);
     },
 
     load_date_range:function(){
