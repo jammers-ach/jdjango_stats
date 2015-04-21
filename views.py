@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.views.generic import View
 import datetime
 from django.http import HttpResponse,JsonResponse
-from django.db.models import Count
+from django.db.models import Count,Sum
 
 strip_time = lambda x: datetime.datetime.strptime(x,'%Y-%m-%d').date()
 format_day = lambda x: "Date(%d,%d,%d,0,0,0)" %(x.year,x.month,x.day)
@@ -109,6 +109,31 @@ class TimeSeriesView(View):
 
 
 
+class CountedDataView(TimeSeriesView):
+    '''Like a time series view, but it counts all the fields into one'''
+
+    def get_ts_queries(self,start,end):
+        '''adds the ts filtering and grouping onto the queries from get_queries'''
+        queries = []
+
+        #Set the column titles
+        self.cols = []
+        self.cols.append({'id': '', 'label': 'date', 'type': 'date'})
+        for label,ts_field,sum_field,base_query in self.get_queries():
+
+            ts_filter = {ts_field+'__gte':start,
+                         ts_field+'__lte':end}
+            new_q = base_query.filter(**ts_filter).values(ts_field).annotate(count=Sum(sum_field)).order_by()
+
+            self.cols.append({'id':'',
+                              'label':label,
+                              'type':'number',
+                              })
+
+            queries.append( (label,ts_field,new_q) )
+
+
+        return queries
 
 class SummedDataView(TimeSeriesView):
     '''Like a time series view, but it puts summs all the data for a peroid into a chart'''
