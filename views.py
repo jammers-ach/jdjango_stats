@@ -23,14 +23,14 @@ class TimeSeriesView(View):
         pass
 
 
-    def get_ts_queries(self,start,end):
+    def get_ts_queries(self,start,end,request):
         '''adds the ts filtering and grouping onto the queries from get_queries'''
         queries = []
 
         #Set the column titles
         self.cols = []
         self.cols.append({'id': '', 'label': 'date', 'type': 'date'})
-        for label,ts_field,base_query in self.get_queries():
+        for label,ts_field,base_query in self.get_queries(request=request):
 
             ts_filter = {ts_field+'__gte':start,
                          ts_field+'__lte':end}
@@ -96,7 +96,7 @@ class TimeSeriesView(View):
         s = strip_time(request.GET['s']) if 's' in request.GET else datetime.date.today() - datetime.timedelta(days=100)
         e = strip_time(request.GET['e']) if 'e' in request.GET else datetime.date.today()
 
-        queries = self.get_ts_queries(s,e)
+        queries = self.get_ts_queries(s,e,request)
 
         if('xls' not in request.GET):
             results = self.queries_to_json(queries,s,e)
@@ -112,14 +112,14 @@ class TimeSeriesView(View):
 class CountedDataView(TimeSeriesView):
     '''Like a time series view, but it counts all the fields into one'''
 
-    def get_ts_queries(self,start,end):
+    def get_ts_queries(self,start,end,request):
         '''adds the ts filtering and grouping onto the queries from get_queries'''
         queries = []
 
         #Set the column titles
         self.cols = []
         self.cols.append({'id': '', 'label': 'date', 'type': 'date'})
-        for label,ts_field,sum_field,base_query in self.get_queries():
+        for label,ts_field,sum_field,base_query in self.get_queries(request=request):
 
             ts_filter = {ts_field+'__gte':start,
                          ts_field+'__lte':end}
@@ -141,14 +141,14 @@ class SummedDataView(TimeSeriesView):
     label = 'Objects'
     label2 = 'Count'
 
-    def get_ts_queries(self,start,end):
+    def get_ts_queries(self,start,end,request):
         '''adds the ts filtering and grouping onto the queries from get_queries'''
         queries = []
 
         #Set the column titles
         self.cols = []
         self.cols.append({'id': '', 'label': self.label, 'type': 'string'})
-        for label,ts_field,base_query in self.get_queries():
+        for label,ts_field,base_query in self.get_queries(request=request):
 
             ts_filter = {ts_field+'__gte':start,
                          ts_field+'__lte':end}
