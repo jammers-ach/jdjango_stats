@@ -7,7 +7,10 @@ from django.db.models import Count
 strip_time = lambda x: datetime.datetime.strptime(x,'%Y-%m-%d').date()
 format_day = lambda x: "Date(%d,%d,%d,0,0,0)" %(x.year,x.month,x.day)
 
-
+def unformat_date(d):
+    d = d.replace('Date(','')
+    d = d.split(',')
+    return '%s-%s-%s' % (d[0],d[1],d[2])
 
 class TimeSeriesView(View):
     '''Gets a simple time series query, override get_queries for your own TS queries'''
@@ -79,15 +82,31 @@ class TimeSeriesView(View):
             "rows":rows,
         }
 
+    def queries_to_excel(self,queries,s,e):
+        rows = self.create_rows(queries,s,e)
+        s = [ ','.join([col['label'] for col in self.cols]) ]
+        make_date = lambda d: d if not d.startswith('Date') else unformat_date(d)
+        for row in rows:
+            print row
+            s.append( ','.join([ make_date(unicode(x['v'])) for x in row['c']]))
+
+        return '\n'.join(s)
+
     def get(self,request):
 
         s = strip_time(request.GET['s']) if 's' in request.GET else datetime.date.today() - datetime.timedelta(days=100)
         e = strip_time(request.GET['e']) if 'e' in request.GET else datetime.date.today()
 
         queries = self.get_ts_queries(s,e)
-        results = self.queries_to_json(queries,s,e)
 
-        return JsonResponse(results,safe=False)
+        if('xls' not in request.GET):
+            results = self.queries_to_json(queries,s,e)
+            return JsonResponse(results,safe=False)
+        else:
+            results = self.queries_to_excel(queries,s,e)
+            response = HttpResponse(results,content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="stat.csv"'
+            return response
 
 
 
