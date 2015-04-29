@@ -104,7 +104,7 @@ $.widget( "custom.gchart", {
      * subtitle just gives the date range
      */
     subtitle:function(){
-        return  this._get_start() + ' to ' + this._get_end();
+        return  this._get_start() + ' - ' + this._get_end();
     },
 
 

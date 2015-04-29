@@ -109,6 +109,7 @@ class TimeSeriesView(View):
 
 
 
+
 class CountedDataView(TimeSeriesView):
     '''Like a time series view, but it counts all the fields into one'''
 
