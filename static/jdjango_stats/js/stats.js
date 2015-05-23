@@ -24,6 +24,7 @@ $.widget( "custom.gchart", {
         start:moment().startOf('month'),
         end:moment().endOf('month'),
         title:'untitled chart',
+        show_sum_options:true,
     },
 
 
@@ -56,9 +57,13 @@ $.widget( "custom.gchart", {
         var row2 = $('<div></div>').appendTo(this.button_area).addClass('input-group');
         var row3 = $('<div></div>').appendTo(this.button_area).addClass('input-group');
 
-        row1.append(this._add_button(gettext('this week'),'view_this_week'));
-        row1.append(this._add_button(gettext('this month'),'view_this_month'));
-        row1.append(this._add_button(gettext('this year'),'view_this_year'));
+        this.week_view = this._add_button(gettext('this week'),'view_this_week');
+        this.month_view = this._add_button(gettext('this month'),'view_this_month');
+        this.year_view = this._add_button(gettext('this year'),'view_this_year');
+
+        row1.append(this.week_view);
+        row1.append(this.month_view);
+        row1.append(this.year_view);
 
         this.r1 = $('<input type="text" class="form-control"/>').attr('placeholder',gettext('from')).css('width','100px');
         this.r2 = $('<input type="text" class="form-control"/>').attr('placeholder',gettext('to')).css('width','100px');
@@ -73,31 +78,64 @@ $.widget( "custom.gchart", {
         this._on(this.r2,{'change':'load_date_range'})
         this._on(this.r1,{'change':'load_date_range'})
 
+        this.week_view.removeClass('active');
+        this.month_view.addClass('active');
+        this.year_view.removeClass('active');
 
         this.excel_link = $('<a class="btn btn-default" href="" target="_blank">'+gettext('Download in excel')+'</a>').appendTo(row3);
+
+        if(this.options.show_sum_options && this.options.type != 'PieChart'){
+            var days  = $('<label><input type="radio" name="sumopt" value="d" checked="checked">'+gettext('days')+'</label>');
+            var months  = $('<label><input type="radio" name="sumopt" value="m">'+gettext('months')+'</label>');
+            var weeks  = $('<label><input type="radio" name="sumopt" value="w">'+gettext('weeks')+'</label>');
+            var f = $('<form></form>').css('display','inline-block').append(days).append(weeks).append(months).appendTo(row3);
+            //var d = $('<div></div>').addClass('input-group').append(f).appendTo(row3);
+
+            this._on(days,{'change':'update_chart'});
+            this._on(months,{'change':'update_chart'});
+            this._on(weeks,{'change':'update_chart'});
+         }
     },
 
     load_date_range:function(){
         this.options.start = moment(this.r1.val());
         this.options.end = moment(this.r2.val());
         this.update_chart();
+
+        this.week_view.removeClass('active');
+        this.month_view.removeClass('active');
+        this.year_view.removeClass('active');
+
     },
 
     view_this_week:function(){
         this.options.start = moment().startOf('week');
         this.options.end = moment().endOf('week');
         this.update_chart();
+
+        this.week_view.addClass('active');
+        this.month_view.removeClass('active');
+        this.year_view.removeClass('active');
     },
     view_this_year:function(){
         this.options.start = moment().startOf('year');
         this.options.end = moment().endOf('year');
         this.update_chart();
+
+        this.week_view.removeClass('active');
+        this.month_view.removeClass('active');
+        this.year_view.addClass('active');
     },
 
     view_this_month:function(){
         this.options.start = moment().startOf('month');
         this.options.end = moment().endOf('month');
         this.update_chart();
+
+        this.week_view.removeClass('active');
+        this.month_view.addClass('active');
+        this.year_view.removeClass('active');
+
     },
 
     /**
@@ -125,11 +163,19 @@ $.widget( "custom.gchart", {
     update_chart:function(){
         var s = this._get_start();
         var e = this._get_end();
+        var data = {s:s,e:e};
+
+        if(this.options.show_sum_options){
+            var sumopt = this.element.find('input:radio[name=sumopt]:checked');
+            data['sumopt'] = sumopt.val();
+        }
+
+
         var jsonData = $.ajax({
             url: this.options.url,
             dataType:"json",
             async: false,
-            data:{s:s,e:e}
+            data:data
         }).responseText;
 
         options = {

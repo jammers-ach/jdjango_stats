@@ -46,19 +46,37 @@ class TimeSeriesView(View):
 
         return queries
 
+    def get_date(self,d):
+        '''filters out the date, e.g. if we're summing over months it will return
+        the date at the start of the month'''
+        if(self.sum_month):
+            d2 = datetime.date(d.year,d.month,1)
+            return d2
+        elif(self.sum_week):
+            return d - datetime.timedelta(days = d.weekday())
+
+        else:
+            return d
+
     def create_rows(self,queries,s,e):
         '''Takes the set of queries and makes rows in the table based on the day'''
         results = []
         teachers = lambda queries: dict([ (t,0) for  t,_,_ in queries])
 
+        sumup = self.sum_month or self.sum_week
 
         total_results = {}
         for t,ts_field,q in queries:
             for r in q:
-                date = r[ts_field]
+
+                date = self.get_date(r[ts_field])
                 if(date not in total_results):
                     total_results[date] = teachers(queries)
-                total_results[date][t] = r['count']
+
+                if(sumup):
+                    total_results[date][t] += r['count']
+                else:
+                    total_results[date][t] = r['count']
 
 
 
@@ -97,6 +115,9 @@ class TimeSeriesView(View):
         e = strip_time(request.GET['e']) if 'e' in request.GET else datetime.date.today()
 
         queries = self.get_ts_queries(s,e,request)
+
+        self.sum_month = request.GET.get('sumopt','') == 'm'
+        self.sum_week = request.GET.get('sumopt','') == 'w'
 
         if('xls' not in request.GET):
             results = self.queries_to_json(queries,s,e)
